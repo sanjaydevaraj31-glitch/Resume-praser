@@ -1,0 +1,35 @@
+/* Responsive media queries */
+@media (max-width: 1024px) {
+  .portal-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nav-tabs {
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  .nav-actions {
+    justify-content: space-between;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .metrics-ribbon {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .schema-tables-grid {
+    grid-template-columns: 1fr;
+  }
+}
