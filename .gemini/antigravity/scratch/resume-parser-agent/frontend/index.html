@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Parser Agent - AI Recruitment Platform</title>
+  
+  <!-- Modern Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- Top Navigation Header -->
+    <header class="navbar">
+      <div class="navbar-container">
+        <div class="brand-group">
+          <div class="brand-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <div class="brand-info">
+            <h1>Resume Parser Agent</h1>
+            <p>AI Recruitment Management Platform & Persistent Database</p>
+          </div>
+        </div>
+
+        <!-- Navigation Portals -->
+        <nav class="nav-tabs">
+          <button class="nav-tab active" data-tab="candidate-portal" id="tab-candidate-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            Candidate Portal
+          </button>
+          <button class="nav-tab" data-tab="recruiter-portal" id="tab-recruiter-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+            Recruiter Portal
+          </button>
+          <button class="nav-tab" data-tab="schema-explorer" id="tab-schema-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+            Database Schema (7 Tables)
+          </button>
+          <button class="nav-tab" data-tab="integrity-console" id="tab-console-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            Constraint Verifier
+          </button>
+        </nav>
+
+        <!-- Right Header Status & Role Indicator -->
+        <div class="nav-actions">
+          <div class="db-status-badge" id="db-health-badge">
+            <span class="pulse-dot"></span>
+            <span id="db-status-label">Checking DB...</span>
+          </div>
+          <div class="role-selector-pill">
+            <label for="current-role-select">Active Role:</label>
+            <select id="current-role-select" class="role-select">
+              <option value="USER" selected>USER (Candidate)</option>
+              <option value="ADMIN">ADMIN (Recruiter)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+      
+      <!-- Top Metrics Ribbon -->
+      <section class="metrics-ribbon">
+        <div class="metric-card">
+          <div class="metric-icon metric-users">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
+          <div class="metric-content">
+            <span class="metric-value" id="stat-users">0</span>
+            <span class="metric-title">Users (Role: USER & ADMIN)</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon metric-companies">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+          </div>
+          <div class="metric-content">
+            <span class="metric-value" id="stat-companies">0</span>
+            <span class="metric-title">Companies</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon metric-jobs">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 3h-8v4h8z"></path></svg>
+          </div>
+          <div class="metric-content">
+            <span class="metric-value" id="stat-jobs">0</span>
+            <span class="metric-title">Jobs & Required Skills</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon metric-apps">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          </div>
+          <div class="metric-content">
+            <span class="metric-value" id="stat-applications">0</span>
+            <span class="metric-title">Applications (Active)</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon metric-interviews">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
+          <div class="metric-content">
+            <span class="metric-value" id="stat-interviews">0</span>
+            <span class="metric-title">Interviews</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Global Alert Box -->
+      <div id="global-alert" class="alert-box" style="display: none;">
+        <div class="alert-content">
+          <span id="alert-icon">ℹ️</span>
+          <span id="alert-message">Status notification</span>
+        </div>
+        <button class="alert-close-btn" onclick="document.getElementById('global-alert').style.display='none'">✕</button>
+      </div>
+
+      <!-- TAB 1: CANDIDATE PORTAL -->
+      <section class="tab-pane active" id="pane-candidate-portal">
+        <div class="portal-grid">
+          
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title-group">
+                <span class="role-badge role-user">Role: USER</span>
+                <h2>Candidate Profile & Resume</h2>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btn-quick-seed">Seed Real Starter Data</button>
+            </div>
+
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="select-candidate-user">Active Candidate Account:</label>
+                <select id="select-candidate-user" class="form-select">
+                  <option value="">Loading users...</option>
+                </select>
+              </div>
+
+              <details class="collapsible-section">
+                <summary class="collapsible-header">+ Register New Candidate (Role: USER)</summary>
+                <form id="form-create-candidate" class="nested-form" onsubmit="event.preventDefault(); window.App.handleCreateCandidate();">
+                  <div class="form-row">
+                    <div class="form-group flex-1">
+                      <label>Full Name:</label>
+                      <input type="text" id="cand-name" class="form-input" placeholder="e.g. Maya Lin" required>
+                    </div>
+                    <div class="form-group flex-1">
+                      <label>Email (Unique UK):</label>
+                      <input type="email" id="cand-email" class="form-input" placeholder="maya.lin@example.com" required>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group flex-1">
+                      <label>Password:</label>
+                      <input type="password" id="cand-password" class="form-input" placeholder="Secure password" required>
+                    </div>
+                    <div class="form-group flex-1 form-align-end">
+                      <button type="submit" class="btn btn-primary w-full">Create Account</button>
+                    </div>
+                  </div>
+                </form>
+              </details>
+
+              <div class="resume-upload-section mt-4">
+                <h3 class="section-subtitle">Resume Document Attachment (resumes table)</h3>
+                <form id="form-register-resume" class="nested-form" onsubmit="event.preventDefault(); window.App.handleRegisterResume();">
+                  <div class="form-row">
+                    <div class="form-group flex-1">
+                      <label>Resume File Name:</label>
+                      <input type="text" id="resume-filename" class="form-input" placeholder="e.g. Maya_Lin_Senior_Dev.pdf" required>
+                    </div>
+                    <div class="form-group flex-1">
+                      <label>File Storage Path:</label>
+                      <input type="text" id="resume-path" class="form-input" placeholder="/storage/resumes/maya_lin.pdf" required>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Resume Content / Summary:</label>
+                    <textarea id="resume-rawtext" class="form-textarea" rows="2" placeholder="Candidate background, skills highlights, and experience..."></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-secondary btn-sm">Attach Resume to Candidate</button>
+                </form>
+              </div>
+
+              <div class="resumes-list-box mt-3" id="candidate-resumes-box">
+                <span class="text-muted text-sm">Resumes attached to selected candidate will appear here.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title-group">
+                <span class="step-indicator">Apply</span>
+                <h2>Available Job Postings</h2>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="window.App.loadJobs()">↻ Refresh Jobs</button>
+            </div>
+
+            <div class="panel-body">
+              <p class="text-sm text-muted mb-3">Select an open job posting to apply with your candidate profile.</p>
+              
+              <div class="jobs-feed" id="jobs-feed-list">
+                <div class="empty-state">Loading job postings from persistent database...</div>
+              </div>
+
+              <div class="my-applications-section mt-5">
+                <div class="section-header-flex">
+                  <h3>My Applications (Live Tracker)</h3>
+                  <span class="badge badge-info text-xs">Rule: 1 Active App / Job</span>
+                </div>
+                <div class="table-responsive mt-2">
+                  <table class="data-table" id="my-apps-table">
+                    <thead>
+                      <tr>
+                        <th>App ID</th>
+                        <th>Job Title</th>
+                        <th>Company</th>
+                        <th>Status</th>
+                        <th>Active</th>
+                        <th>Applied At</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="my-apps-tbody">
+                      <tr><td colspan="7" class="text-center text-muted">No applications found.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 2: RECRUITER PORTAL -->
+      <section class="tab-pane" id="pane-recruiter-portal">
+        <div class="portal-grid">
+          
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title-group">
+                <span class="role-badge role-admin">Role: ADMIN</span>
+                <h2>Post New Job & Manage Companies</h2>
+              </div>
+            </div>
+
+            <div class="panel-body">
+              <details class="collapsible-section">
+                <summary class="collapsible-header">+ Register New Company</summary>
+                <form id="form-create-company" class="nested-form" onsubmit="event.preventDefault(); window.App.handleCreateCompany();">
+                  <div class="form-row">
+                    <div class="form-group flex-1">
+                      <label>Company Name:</label>
+                      <input type="text" id="comp-name" class="form-input" placeholder="e.g. Acme AI Innovations" required>
+                    </div>
+                    <div class="form-group flex-1">
+                      <label>Website:</label>
+                      <input type="url" id="comp-website" class="form-input" placeholder="https://acmeai.example.com">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group flex-1">
+                      <label>Location:</label>
+                      <input type="text" id="comp-location" class="form-input" placeholder="San Francisco, CA / Remote">
+                    </div>
+                    <div class="form-group flex-1">
+                      <label>Industry:</label>
+                      <input type="text" id="comp-industry" class="form-input" placeholder="Software / AI">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Description:</label>
+                    <textarea id="comp-desc" class="form-textarea" rows="2" placeholder="Company description..."></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-sm">Save Company</button>
+                </form>
+              </details>
+
+              <form id="form-post-job" class="mt-4" onsubmit="event.preventDefault(); window.App.handlePostJob();">
+                <h3 class="section-subtitle">Create New Job Posting (jobs & job_skills tables)</h3>
+                
+                <div class="form-row">
+                  <div class="form-group flex-1">
+                    <label for="job-company-select">Hiring Company (FK):</label>
+                    <select id="job-company-select" class="form-select" required>
+                      <option value="">Select Company...</option>
+                    </select>
+                  </div>
+                  <div class="form-group flex-1">
+                    <label for="job-creator-select">Recruiter (Admin FK):</label>
+                    <select id="job-creator-select" class="form-select">
+                      <option value="">Select Recruiter...</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group flex-2">
+                    <label for="job-title-input">Job Title:</label>
+                    <input type="text" id="job-title-input" class="form-input" placeholder="e.g. Lead AI Engineer" required>
+                  </div>
+                  <div class="form-group flex-1">
+                    <label for="job-location-input">Location:</label>
+                    <input type="text" id="job-location-input" class="form-input" placeholder="Remote / SF" value="Remote">
+                  </div>
+                  <div class="form-group flex-1">
+                    <label for="job-type-select">Type:</label>
+                    <select id="job-type-select" class="form-select">
+                      <option value="FULL_TIME">FULL_TIME</option>
+                      <option value="PART_TIME">PART_TIME</option>
+                      <option value="CONTRACT">CONTRACT</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="job-desc-input">Job Description:</label>
+                  <textarea id="job-desc-input" class="form-textarea" rows="3" placeholder="Detailed job description and responsibilities..." required></textarea>
+                </div>
+
+                <div class="skills-builder-group">
+                  <div class="skills-header">
+                    <label>Required Job Skills (job_skills table):</label>
+                    <button type="button" class="btn btn-ghost btn-xs" onclick="window.App.addSkillRow()">+ Add Skill</button>
+                  </div>
+                  <div id="skills-container" class="skills-container">
+                    <div class="skill-input-row">
+                      <input type="text" class="form-input skill-name" placeholder="Skill Name" value="Python / FastAPI" required>
+                      <input type="number" class="form-input skill-exp" placeholder="Min Yrs" value="3" min="0" step="0.5">
+                      <label class="checkbox-label"><input type="checkbox" class="skill-req" checked> Required</label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-4">
+                  <button type="submit" class="btn btn-primary w-full">Post Job to Persistent DB</button>
+                </div>
+              </form>
+
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title-group">
+                <span class="step-indicator">Review</span>
+                <h2>Candidate Applications & Pipeline</h2>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="window.App.loadRecruiterApplications()">↻ Refresh</button>
+            </div>
+
+            <div class="panel-body">
+              <div class="table-responsive">
+                <table class="data-table" id="recruiter-apps-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Candidate</th>
+                      <th>Job Posting</th>
+                      <th>Status</th>
+                      <th>Active</th>
+                      <th>Applied</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recruiter-apps-tbody">
+                    <tr><td colspan="7" class="text-center text-muted">Loading applications...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="interviews-section mt-5">
+                <div class="section-header-flex">
+                  <h3>Scheduled Interviews (interviews table)</h3>
+                </div>
+                <div class="table-responsive mt-2">
+                  <table class="data-table" id="interviews-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>App ID</th>
+                        <th>Interviewer</th>
+                        <th>Status</th>
+                        <th>Meeting Link</th>
+                        <th>Notes</th>
+                        <th>Created At</th>
+                      </tr>
+                    </thead>
+                    <tbody id="interviews-tbody">
+                      <tr><td colspan="7" class="text-center text-muted">No interviews scheduled yet.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 3: DATABASE SCHEMA EXPLORER -->
+      <section class="tab-pane" id="pane-schema-explorer">
+        <div class="schema-overview-card">
+          <div class="schema-header">
+            <div>
+              <h2>Persistent Database Architecture (7 Core Tables)</h2>
+              <p>Direct live introspection of table schemas, column types, foreign keys, indexes, and row counts.</p>
+            </div>
+            <div class="schema-actions">
+              <button class="btn btn-secondary btn-sm" onclick="window.App.loadSchemaExplorer()">↻ Refresh Schema</button>
+            </div>
+          </div>
+
+          <div class="schema-tables-grid" id="schema-tables-container">
+            <div class="empty-state">Introspecting database structure...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: CONSTRAINT VERIFICATION CONSOLE -->
+      <section class="tab-pane" id="pane-integrity-console">
+        <div class="verifier-card">
+          <div class="verifier-header">
+            <div>
+              <h2>Database Constraint & Integrity Verification Console</h2>
+              <p>Execute real-time architectural constraint tests against the persistent SQLite database.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="window.App.runAllConstraintTests()">▶ Run All Integrity Tests</button>
+          </div>
+
+          <div class="test-suites-grid">
+            
+            <div class="test-item-card">
+              <div class="test-item-header">
+                <div class="test-title">
+                  <span class="test-badge">Constraint #1</span>
+                  <h3>User Email Uniqueness Constraint</h3>
+                </div>
+                <span class="test-status-pill" id="status-test-email">Pending</span>
+              </div>
+              <p class="test-desc">Verifies that registering a duplicate email raises a database UniqueConstraint violation and HTTP 400 rejection.</p>
+              <div class="test-action-bar">
+                <button class="btn btn-secondary btn-xs" onclick="window.App.testEmailUniqueness()">Execute Test</button>
+                <span class="test-log" id="log-test-email">-</span>
+              </div>
+            </div>
+
+            <div class="test-item-card">
+              <div class="test-item-header">
+                <div class="test-title">
+                  <span class="test-badge">Constraint #2</span>
+                  <h3>Single Active Application per Job Constraint</h3>
+                </div>
+                <span class="test-status-pill" id="status-test-active-app">Pending</span>
+              </div>
+              <p class="test-desc">Ensures the same candidate cannot submit multiple active applications for the same job, while allowing new applications once previous ones are inactive.</p>
+              <div class="test-action-bar">
+                <button class="btn btn-secondary btn-xs" onclick="window.App.testActiveAppConstraint()">Execute Test</button>
+                <span class="test-log" id="log-test-active-app">-</span>
+              </div>
+            </div>
+
+            <div class="test-item-card">
+              <div class="test-item-header">
+                <div class="test-title">
+                  <span class="test-badge">Constraint #3</span>
+                  <h3>Foreign Key Integrity (PRAGMA foreign_keys)</h3>
+                </div>
+                <span class="test-status-pill" id="status-test-fk">Pending</span>
+              </div>
+              <p class="test-desc">Verifies that foreign key enforcement prevents orphaned records (e.g. applications referencing non-existent jobs or users).</p>
+              <div class="test-action-bar">
+                <button class="btn btn-secondary btn-xs" onclick="window.App.testForeignKeyConstraint()">Execute Test</button>
+                <span class="test-log" id="log-test-fk">-</span>
+              </div>
+            </div>
+
+            <div class="test-item-card">
+              <div class="test-item-header">
+                <div class="test-title">
+                  <span class="test-badge">Constraint #4</span>
+                  <h3>Role Type Validation (USER / ADMIN)</h3>
+                </div>
+                <span class="test-status-pill" id="status-test-role">Pending</span>
+              </div>
+              <p class="test-desc">Verifies role assignment support for both USER (Candidate) and ADMIN (Recruiter) with password hashing verification.</p>
+              <div class="test-action-bar">
+                <button class="btn btn-secondary btn-xs" onclick="window.App.testRoleValidation()">Execute Test</button>
+                <span class="test-log" id="log-test-role">-</span>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="terminal-output-box mt-4">
+            <div class="terminal-titlebar">
+              <span>Verification Execution Logs</span>
+              <button class="btn btn-ghost btn-xs" onclick="document.getElementById('console-terminal-text').textContent=''">Clear</button>
+            </div>
+            <pre class="terminal-body" id="console-terminal-text">Ready to run verification tests...</pre>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Modal for Applying to a Job -->
+    <div id="apply-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 id="apply-modal-title">Apply to Job</h3>
+          <button class="modal-close-btn" onclick="window.App.closeApplyModal()">✕</button>
+        </div>
+        <form id="form-submit-application" onsubmit="event.preventDefault(); window.App.confirmSubmitApplication();">
+          <div class="modal-body">
+            <input type="hidden" id="modal-job-id">
+            
+            <div class="info-callout">
+              <strong id="modal-company-name">-</strong>
+              <div id="modal-job-location" class="text-sm text-muted">-</div>
+            </div>
+
+            <div class="form-group mt-3">
+              <label>Applicant Candidate:</label>
+              <select id="modal-user-select" class="form-select" required>
+                <option value="">Select candidate...</option>
+              </select>
+            </div>
+
+            <div class="form-group mt-3">
+              <label>Select Attached Resume (Optional):</label>
+              <select id="modal-resume-select" class="form-select">
+                <option value="">No resume attached</option>
+              </select>
+            </div>
+
+            <div class="note-box mt-3">
+              <span class="note-icon">🔒</span>
+              <span class="note-text">Database rule enforced: Cannot have multiple active applications for this job.</span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" onclick="window.App.closeApplyModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btn-modal-apply">Submit Application</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal for Scheduling Interview -->
+    <div id="interview-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>Schedule Candidate Interview</h3>
+          <button class="modal-close-btn" onclick="window.App.closeInterviewModal()">✕</button>
+        </div>
+        <form id="form-schedule-interview" onsubmit="event.preventDefault(); window.App.confirmScheduleInterview();">
+          <div class="modal-body">
+            <input type="hidden" id="modal-interview-app-id">
+            
+            <div class="info-callout">
+              <strong id="modal-interview-applicant">-</strong>
+              <div id="modal-interview-job" class="text-sm text-muted">-</div>
+            </div>
+
+            <div class="form-group mt-3">
+              <label>Interviewer (Admin Recruiter):</label>
+              <select id="modal-interviewer-select" class="form-select">
+                <option value="">Select Recruiter...</option>
+              </select>
+            </div>
+
+            <div class="form-group mt-3">
+              <label>Meeting Link:</label>
+              <input type="url" id="modal-meeting-link" class="form-input" placeholder="https://meet.example.com/interview-room">
+            </div>
+
+            <div class="form-group mt-3">
+              <label>Interview Notes / Topic:</label>
+              <textarea id="modal-interview-notes" class="form-textarea" rows="2" placeholder="Technical assessment, cultural fit..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" onclick="window.App.closeInterviewModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Schedule Interview</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
